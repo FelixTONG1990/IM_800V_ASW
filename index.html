@@ -3,16 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>文件加密上传下载系统</title>
-    <script src=" https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js "></script>
+    <title>GitHub加密文件下载系统</title>
+    <link rel="stylesheet" href=" https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css ">
     <style>
         :root {
             --primary-color: #3498db;
             --secondary-color: #2980b9;
             --success-color: #2ecc71;
             --danger-color: #e74c3c;
+            --warning-color: #f39c12;
             --light-color: #ecf0f1;
             --dark-color: #34495e;
+            --background-color: #f5f7fa;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #dddddd;
         }
         
         * {
@@ -23,16 +28,17 @@
         }
         
         body {
-            background-color: #f5f7fa;
-            color: #333;
+            background-color: var(--background-color);
+            color: var(--text-color);
             line-height: 1.6;
             padding: 20px;
+            min-height: 100vh;
         }
         
         .container {
             max-width: 800px;
             margin: 0 auto;
-            background: white;
+            background: var(--card-color);
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             overflow: hidden;
@@ -55,36 +61,8 @@
             opacity: 0.9;
         }
         
-        .tabs {
-            display: flex;
-            background: var(--light-color);
-        }
-        
-        .tab {
-            flex: 1;
-            padding: 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 600;
-        }
-        
-        .tab.active {
-            background: white;
-            color: var(--primary-color);
-            border-bottom: 3px solid var(--primary-color);
-        }
-        
         .content {
             padding: 30px;
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
         }
         
         .form-group {
@@ -98,19 +76,14 @@
             color: var(--dark-color);
         }
         
-        input[type="file"],
-        input[type="password"],
-        input[type="text"] {
+        input[type="text"],
+        input[type="password"] {
             width: 100%;
             padding: 12px;
-            border: 2px solid #ddd;
+            border: 2px solid var(--border-color);
             border-radius: 5px;
             font-size: 16px;
             transition: border-color 0.3s;
-        }
-        
-        input[type="file"] {
-            padding: 10px;
         }
         
         input:focus {
@@ -131,6 +104,7 @@
             cursor: pointer;
             transition: background 0.3s;
             text-align: center;
+            margin-top: 10px;
         }
         
         .btn:hover {
@@ -153,33 +127,17 @@
             background: #c0392b;
         }
         
-        .file-info {
-            background: var(--light-color);
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
-            display: none;
-        }
-        
-        .file-info.active {
-            display: block;
-        }
-        
-        .file-info p {
-            margin-bottom: 8px;
-        }
-        
         .file-list {
             margin-top: 20px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             border-radius: 5px;
-            max-height: 300px;
+            max-height: 400px;
             overflow-y: auto;
         }
         
         .file-item {
             padding: 12px 15px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -187,6 +145,17 @@
         
         .file-item:last-child {
             border-bottom: none;
+        }
+        
+        .file-item.selected {
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+        
+        .file-name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         
         .file-actions {
@@ -200,18 +169,16 @@
             cursor: pointer;
             font-size: 14px;
             font-weight: 600;
+            border: none;
+            color: white;
         }
         
         .download-btn {
             background: var(--primary-color);
-            color: white;
-            border: none;
         }
         
         .delete-btn {
             background: var(--danger-color);
-            color: white;
-            border: none;
         }
         
         .progress-container {
@@ -239,17 +206,10 @@
             text-align: center;
         }
         
-        .encryption-info {
-            background: #e8f4fc;
-            border-left: 4px solid var(--primary-color);
-            padding: 15px;
-            margin-top: 20px;
-            border-radius: 0 5px 5px 0;
-            display: none;
-        }
-        
-        .encryption-info.active {
-            display: block;
+        .empty-state {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
         }
         
         footer {
@@ -258,6 +218,54 @@
             color: #7f8c8d;
             font-size: 14px;
             border-top: 1px solid #eee;
+        }
+        
+        .error-message {
+            color: var(--danger-color);
+            background-color: #fce4e2;
+            border: 1px solid #f5c2c7;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .github-info {
+            background: #f8f9fa;
+            border: 1px solid #e1e4e8;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .github-info h3 {
+            margin-bottom: 10px;
+            color: var(--dark-color);
+        }
+        
+        .github-info p {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .github-info code {
+            background: #f1f2f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        
+        .password-container {
+            position: relative;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #777;
         }
         
         @media (max-width: 600px) {
@@ -283,360 +291,193 @@
                 flex: 1;
             }
         }
+        
+        .file-icon {
+            margin-right: 8px;
+            color: var(--primary-color);
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>文件加密上传下载系统</h1>
-            <p class="description">安全上传、加密存储、密码保护的客户端文件管理系统</p>
+            <h1>GitHub加密文件下载系统</h1>
+            <p class="description">安全访问、密码验证的文件下载系统</p>
         </header>
         
-        <div class="tabs">
-            <div class="tab active" data-tab="upload">上传文件</div>
-            <div class="tab" data-tab="download">下载文件</div>
-            <div class="tab" data-tab="manage">文件管理</div>
-        </div>
-        
         <div class="content">
-            <!-- 上传文件标签页 -->
-            <div class="tab-content active" id="upload-tab">
-                <div class="form-group">
-                    <label for="file-upload">选择文件</label>
-                    <input type="file" id="file-upload">
-                </div>
-                
-                <div class="form-group">
-                    <label for="upload-password">设置加密密码</label>
-                    <input type="password" id="upload-password" placeholder="输入文件加密密码">
-                </div>
-                
-                <div class="form-group">
-                    <label for="confirm-password">确认密码</label>
-                    <input type="password" id="confirm-password" placeholder="再次输入密码">
-                </div>
-                
-                <button class="btn" id="encrypt-btn">加密并存储文件</button>
-                
-                <div class="file-info" id="upload-info">
-                    <p><strong>文件名:</strong> <span id="file-name"></span></p>
-                    <p><strong>文件类型:</strong> <span id="file-type"></span></p>
-                    <p><strong>文件大小:</strong> <span id="file-size"></span></p>
-                </div>
-                
-                <div class="progress-container" id="upload-progress">
-                    <div class="progress-bar">
-                        <div class="progress" id="upload-progress-bar"></div>
-                    </div>
-                    <div class="status" id="upload-status">准备上传...</div>
-                </div>
-                
-                <div class="encryption-info" id="encryption-info">
-                    <h3>加密信息</h3>
-                    <p>您的文件已使用AES-256加密算法进行加密，这是目前最安全的加密标准之一。</p>
-                    <p>加密密钥由您设置的密码生成，没有正确的密码无法解密文件内容。</p>
-                    <p>请妥善保管密码，系统不会存储您的密码，一旦丢失将无法恢复文件。</p>
+            <div class="github-info">
+                <h3><i class="fab fa-github"></i> GitHub配置信息</h3>
+                <p>输入您的GitHub仓库信息以加载文件列表</p>
+            </div>
+            
+            <div class="form-group">
+                <label for="github-owner">仓库所有者</label>
+                <input type="text" id="github-owner" placeholder="输入GitHub用户名或组织名">
+            </div>
+            
+            <div class="form-group">
+                <label for="github-repo">仓库名称</label>
+                <input type="text" id="github-repo" placeholder="输入GitHub仓库名称">
+            </div>
+            
+            <div class="form-group">
+                <label for="github-path">仓库路径 (可选)</label>
+                <input type="text" id="github-path" placeholder="输入仓库内的路径，如: docs/files">
+            </div>
+            
+            <button class="btn" id="load-files-btn">
+                <i class="fas fa-sync-alt"></i> 加载文件列表
+            </button>
+            
+            <div class="form-group">
+                <label>仓库文件列表</label>
+                <div class="file-list" id="file-list">
+                    <div class="empty-state">请先输入仓库信息并加载文件</div>
                 </div>
             </div>
             
-            <!-- 下载文件标签页 -->
-            <div class="tab-content" id="download-tab">
-                <div class="form-group">
-                    <label>选择要下载的文件</label>
-                    <div class="file-list" id="download-file-list">
-                        <!-- 文件列表将通过JavaScript动态生成 -->
-                    </div>
+            <div class="form-group">
+                <label for="download-password">下载密码</label>
+                <div class="password-container">
+                    <input type="password" id="download-password" placeholder="输入文件下载密码">
+                    <span class="toggle-password" id="toggle-password">
+                        <i class="fas fa-eye"></i>
+                    </span>
                 </div>
-                
-                <div class="form-group">
-                    <label for="download-password">输入解密密码</label>
-                    <input type="password" id="download-password" placeholder="输入文件解密密码">
-                </div>
-                
-                <button class="btn btn-success" id="download-btn">下载并解密文件</button>
-                
-                <div class="progress-container" id="download-progress">
-                    <div class="progress-bar">
-                        <div class="progress" id="download-progress-bar"></div>
-                    </div>
-                    <div class="status" id="download-status">准备下载...</div>
-                </div>
+                <div class="error-message" id="password-error"></div>
             </div>
             
-            <!-- 文件管理标签页 -->
-            <div class="tab-content" id="manage-tab">
-                <div class="form-group">
-                    <label>已存储的文件</label>
-                    <div class="file-list" id="file-list">
-                        <!-- 文件列表将通过JavaScript动态生成 -->
-                    </div>
+            <button class="btn btn-success" id="download-btn">
+                <i class="fas fa-download"></i> 下载选中文件
+            </button>
+            
+            <div class="progress-container" id="download-progress">
+                <div class="progress-bar">
+                    <div class="progress" id="download-progress-bar"></div>
                 </div>
-                
-                <div class="form-group">
-                    <button class="btn btn-danger" id="clear-all-btn">清除所有文件</button>
-                </div>
+                <div class="status" id="download-status">准备下载...</div>
             </div>
         </div>
         
         <footer>
-            <p>安全提示：所有文件加密操作均在您的浏览器中完成，不会上传到任何服务器</p>
-            <p>© 2025 文件加密上传下载系统 | 使用AES-256加密技术</p>
+            <p>安全提示：所有操作均在您的浏览器中完成，不会上传到任何服务器</p>
+            <p>© 2025 GitHub加密文件下载系统</p>
         </footer>
     </div>
 
     <script>
-        // 文件存储管理
-        class FileStorage {
-            constructor() {
-                this.storageKey = 'encryptedFiles';
-                this.files = JSON.parse(localStorage.getItem(this.storageKey)) || [];
-            }
-            
-            // 保存文件到本地存储
-            saveFile(fileData) {
-                this.files.push(fileData);
-                localStorage.setItem(this.storageKey, JSON.stringify(this.files));
-                return this.files.length - 1; // 返回文件索引
-            }
-            
-            // 获取所有文件
-            getAllFiles() {
-                return this.files;
-            }
-            
-            // 获取单个文件
-            getFile(index) {
-                return this.files[index];
-            }
-            
-            // 删除文件
-            deleteFile(index) {
-                this.files.splice(index, 1);
-                localStorage.setItem(this.storageKey, JSON.stringify(this.files));
-            }
-            
-            // 清空所有文件
-            clearAllFiles() {
-                this.files = [];
-                localStorage.removeItem(this.storageKey);
-            }
-        }
-        
-        // 文件加密类
-        class FileEncryptor {
-            // 加密文件
-            static encryptFile(file, password) {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    
-                    reader.onload = function(event) {
-                        try {
-                            const fileData = event.target.result;
-                            // 使用CryptoJS进行AES加密
-                            const encrypted = CryptoJS.AES.encrypt(
-                                CryptoJS.lib.WordArray.create(fileData),
-                                password
-                            ).toString();
-                            
-                            resolve(encrypted);
-                        } catch (error) {
-                            reject(error);
-                        }
-                    };
-                    
-                    reader.onerror = reject;
-                    reader.readAsArrayBuffer(file);
-                });
-            }
-            
-            // 解密文件
-            static decryptFile(encryptedData, password) {
-                try {
-                    // 使用CryptoJS进行AES解密
-                    const decrypted = CryptoJS.AES.decrypt(encryptedData, password);
-                    const decryptedArray = new Uint8Array(decrypted.sigBytes);
-                    
-                    for (let i = 0; i < decrypted.sigBytes; i++) {
-                        decryptedArray[i] = decrypted.words[i >>> 2] >>> (24 - (i % 4) * 8) & 0xff;
-                    }
-                    
-                    return decryptedArray;
-                } catch (error) {
-                    throw new Error('解密失败，请检查密码是否正确');
-                }
-            }
-        }
-        
         // DOM元素
-        const tabElements = document.querySelectorAll('.tab');
-        const tabContentElements = document.querySelectorAll('.tab-content');
-        const fileUploadInput = document.getElementById('file-upload');
-        const uploadPasswordInput = document.getElementById('upload-password');
-        const confirmPasswordInput = document.getElementById('confirm-password');
-        const encryptBtn = document.getElementById('encrypt-btn');
-        const uploadInfo = document.getElementById('upload-info');
-        const fileNameElement = document.getElementById('file-name');
-        const fileTypeElement = document.getElementById('file-type');
-        const fileSizeElement = document.getElementById('file-size');
-        const uploadProgress = document.getElementById('upload-progress');
-        const uploadProgressBar = document.getElementById('upload-progress-bar');
-        const uploadStatus = document.getElementById('upload-status');
-        const encryptionInfo = document.getElementById('encryption-info');
-        const downloadFileList = document.getElementById('download-file-list');
+        const githubOwnerInput = document.getElementById('github-owner');
+        const githubRepoInput = document.getElementById('github-repo');
+        const githubPathInput = document.getElementById('github-path');
+        const loadFilesBtn = document.getElementById('load-files-btn');
+        const fileListElement = document.getElementById('file-list');
         const downloadPasswordInput = document.getElementById('download-password');
+        const passwordError = document.getElementById('password-error');
         const downloadBtn = document.getElementById('download-btn');
         const downloadProgress = document.getElementById('download-progress');
         const downloadProgressBar = document.getElementById('download-progress-bar');
         const downloadStatus = document.getElementById('download-status');
-        const fileListElement = document.getElementById('file-list');
-        const clearAllBtn = document.getElementById('clear-all-btn');
+        const togglePassword = document.getElementById('toggle-password');
         
-        // 初始化文件存储
-        const fileStorage = new FileStorage();
+        // 存储当前选中的文件和文件列表
+        let selectedFile = null;
+        let filesList = [];
         
-        // 标签切换功能
-        tabElements.forEach(tab => {
-            tab.addEventListener('click', () => {
-                // 移除所有活动标签
-                tabElements.forEach(t => t.classList.remove('active'));
-                tabContentElements.forEach(t => t.classList.remove('active'));
-                
-                // 添加当前活动标签
-                tab.classList.add('active');
-                document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
-                
-                // 更新文件列表
-                if (tab.dataset.tab === 'download' || tab.dataset.tab === 'manage') {
-                    renderFileLists();
-                }
-            });
+        // 预设密码（实际应用中应从安全来源获取）
+        const FILE_PASSWORD = "secure123";
+        
+        // 切换密码可见性
+        togglePassword.addEventListener('click', function() {
+            const type = downloadPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            downloadPasswordInput.setAttribute('type', type);
+            this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
         });
         
-        // 文件选择事件
-        fileUploadInput.addEventListener('change', function() {
-            if (this.files.length > 0) {
-                const file = this.files[0];
-                
-                // 显示文件信息
-                fileNameElement.textContent = file.name;
-                fileTypeElement.textContent = file.type || '未知类型';
-                fileSizeElement.textContent = formatFileSize(file.size);
-                uploadInfo.classList.add('active');
-                encryptionInfo.classList.add('active');
-            }
-        });
-        
-        // 加密并存储文件
-        encryptBtn.addEventListener('click', async () => {
-            const file = fileUploadInput.files[0];
-            const password = uploadPasswordInput.value;
-            const confirmPassword = confirmPasswordInput.value;
+        // 加载文件列表
+        loadFilesBtn.addEventListener('click', async function() {
+            const owner = githubOwnerInput.value.trim();
+            const repo = githubRepoInput.value.trim();
+            const path = githubPathInput.value.trim();
             
-            if (!file) {
-                alert('请先选择要上传的文件');
-                return;
-            }
-            
-            if (!password) {
-                alert('请设置加密密码');
-                return;
-            }
-            
-            if (password !== confirmPassword) {
-                alert('两次输入的密码不一致');
+            if (!owner || !repo) {
+                showError(passwordError, '请填写仓库所有者和仓库名称');
                 return;
             }
             
             try {
-                // 显示进度条
-                uploadProgress.style.display = 'block';
-                uploadStatus.textContent = '正在加密文件...';
-                uploadProgressBar.style.width = '30%';
+                // 显示加载状态
+                loadFilesBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 加载中...';
+                loadFilesBtn.disabled = true;
                 
-                // 加密文件
-                const encryptedData = await FileEncryptor.encryptFile(file, password);
+                // 获取仓库文件列表
+                filesList = await getRepoFiles(owner, repo, path);
                 
-                uploadStatus.textContent = '正在存储文件...';
-                uploadProgressBar.style.width = '70%';
+                // 渲染文件列表
+                renderFileList(filesList);
                 
-                // 存储文件数据
-                const fileData = {
-                    name: file.name,
-                    type: file.type,
-                    size: file.size,
-                    encryptedData: encryptedData,
-                    timestamp: new Date().toISOString()
-                };
+                // 重置按钮状态
+                loadFilesBtn.innerHTML = '<i class="fas fa-sync-alt"></i> 加载文件列表';
+                loadFilesBtn.disabled = false;
                 
-                const fileIndex = fileStorage.saveFile(fileData);
-                
-                uploadStatus.textContent = '文件加密存储成功！';
-                uploadProgressBar.style.width = '100%';
-                
-                // 重置表单
-                setTimeout(() => {
-                    fileUploadInput.value = '';
-                    uploadPasswordInput.value = '';
-                    confirmPasswordInput.value = '';
-                    uploadInfo.classList.remove('active');
-                    encryptionInfo.classList.remove('active');
-                    uploadProgress.style.display = 'none';
-                    uploadProgressBar.style.width = '0%';
-                    
-                    // 切换到文件管理标签页
-                    tabElements.forEach(t => t.classList.remove('active'));
-                    tabContentElements.forEach(t => t.classList.remove('active'));
-                    document.querySelector('.tab[data-tab="manage"]').classList.add('active');
-                    document.getElementById('manage-tab').classList.add('active');
-                    
-                    // 更新文件列表
-                    renderFileLists();
-                }, 2000);
+                // 清除错误信息
+                hideError(passwordError);
             } catch (error) {
-                console.error('加密失败:', error);
-                uploadStatus.textContent = '文件加密失败！';
-                uploadProgressBar.style.backgroundColor = 'var(--danger-color)';
+                console.error('加载文件列表失败:', error);
+                showError(passwordError, error.message || '加载文件列表失败');
+                
+                // 重置按钮状态
+                loadFilesBtn.innerHTML = '<i class="fas fa-sync-alt"></i> 加载文件列表';
+                loadFilesBtn.disabled = false;
             }
         });
         
         // 下载文件
-        downloadBtn.addEventListener('click', async () => {
-            const selectedFile = document.querySelector('.file-item.selected');
-            const password = downloadPasswordInput.value;
-            
+        downloadBtn.addEventListener('click', async function() {
             if (!selectedFile) {
-                alert('请选择要下载的文件');
+                showError(passwordError, '请先选择要下载的文件');
                 return;
             }
             
+            const password = downloadPasswordInput.value;
             if (!password) {
-                alert('请输入解密密码');
+                showError(passwordError, '请输入下载密码');
                 return;
             }
             
-            const fileIndex = parseInt(selectedFile.dataset.index);
-            const fileData = fileStorage.getFile(fileIndex);
+            if (password !== FILE_PASSWORD) {
+                showError(passwordError, '密码错误，请重新输入');
+                return;
+            }
             
             try {
+                // 清除错误信息
+                hideError(passwordError);
+                
                 // 显示进度条
                 downloadProgress.style.display = 'block';
-                downloadStatus.textContent = '正在解密文件...';
-                downloadProgressBar.style.width = '50%';
+                downloadStatus.textContent = '正在下载文件...';
+                downloadProgressBar.style.width = '30%';
                 
-                // 解密文件
-                const decryptedData = FileEncryptor.decryptFile(fileData.encryptedData, password);
+                // 获取文件内容
+                const fileContent = await getFileContent(
+                    githubOwnerInput.value.trim(),
+                    githubRepoInput.value.trim(),
+                    selectedFile.path
+                );
                 
-                downloadStatus.textContent = '准备下载文件...';
-                downloadProgressBar.style.width = '80%';
+                downloadStatus.textContent = '正在准备下载...';
+                downloadProgressBar.style.width = '70%';
                 
                 // 创建Blob对象
-                const blob = new Blob([decryptedData], { type: fileData.type });
+                const blob = new Blob([fileContent], { type: 'application/octet-stream' });
                 
                 // 创建下载链接
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = fileData.name;
+                a.download = selectedFile.name;
                 document.body.appendChild(a);
                 a.click();
                 
@@ -655,119 +496,160 @@
                     }, 2000);
                 }, 100);
             } catch (error) {
-                console.error('解密失败:', error);
-                downloadStatus.textContent = error.message || '文件解密失败！';
+                console.error('下载失败:', error);
+                downloadStatus.textContent = error.message || '文件下载失败！';
                 downloadProgressBar.style.backgroundColor = 'var(--danger-color)';
+                showError(passwordError, error.message);
             }
         });
         
-        // 清除所有文件
-        clearAllBtn.addEventListener('click', () => {
-            if (confirm('确定要删除所有存储的文件吗？此操作不可恢复！')) {
-                fileStorage.clearAllFiles();
-                renderFileLists();
+        // 获取仓库文件列表
+        async function getRepoFiles(owner, repo, path = '') {
+            const apiUrl = ` https://api.github.com/repos/$ {owner}/${repo}/contents/${path}`;
+            
+            const response = await fetch(apiUrl);
+            
+            if (!response.ok) {
+                throw new Error('无法获取仓库文件列表');
             }
-        });
+            
+            const data = await response.json();
+            
+            // 过滤出文件类型（排除文件夹）
+            return data.filter(item => item.type === 'file');
+        }
+        
+        // 获取文件内容
+        async function getFileContent(owner, repo, path) {
+            const rawUrl = ` https://raw.githubusercontent.com/$ {owner}/${repo}/main/${path}`;
+            
+            const response = await fetch(rawUrl);
+            
+            if (!response.ok) {
+                throw new Error('无法获取文件内容');
+            }
+            
+            return await response.text();
+        }
         
         // 渲染文件列表
-        function renderFileLists() {
-            const files = fileStorage.getAllFiles();
-            
-            // 下载文件列表
-            downloadFileList.innerHTML = '';
+        function renderFileList(files) {
             if (files.length === 0) {
-                downloadFileList.innerHTML = '<div class="file-item">没有存储的文件</div>';
-            } else {
-                files.forEach((file, index) => {
-                    const fileItem = document.createElement('div');
-                    fileItem.className = 'file-item';
-                    fileItem.dataset.index = index;
-                    fileItem.innerHTML = `
-                        <div>
-                            <strong>${file.name}</strong>
-                            <div>${formatFileSize(file.size)} | ${new Date(file.timestamp).toLocaleString()}</div>
-                        </div>
-                    `;
-                    
-                    fileItem.addEventListener('click', function() {
-                        document.querySelectorAll('.file-item').forEach(item => {
-                            item.classList.remove('selected');
-                        });
-                        this.classList.add('selected');
-                    });
-                    
-                    downloadFileList.appendChild(fileItem);
-                });
+                fileListElement.innerHTML = '<div class="empty-state">该仓库中没有文件</div>';
+                return;
             }
             
-            // 文件管理列表
-            fileListElement.innerHTML = '';
-            if (files.length === 0) {
-                fileListElement.innerHTML = '<div class="file-item">没有存储的文件</div>';
-            } else {
-                files.forEach((file, index) => {
-                    const fileItem = document.createElement('div');
-                    fileItem.className = 'file-item';
-                    fileItem.innerHTML = `
-                        <div>
-                            <strong>${file.name}</strong>
-                            <div>${formatFileSize(file.size)} | ${new Date(file.timestamp).toLocaleString()}</div>
+            let fileListHTML = '';
+            files.forEach(file => {
+                const fileExtension = getFileExtension(file.name);
+                const iconClass = getFileIcon(fileExtension);
+                
+                fileListHTML += `
+                    <div class="file-item" data-path="${file.path}">
+                        <div class="file-name">
+                            <i class="fas ${iconClass} file-icon"></i>
+                            ${file.name}
                         </div>
                         <div class="file-actions">
-                            <button class="action-btn download-btn" data-index="${index}">下载</button>
-                            <button class="action-btn delete-btn" data-index="${index}">删除</button>
+                            <button class="action-btn download-btn" data-path="${file.path}">下载</button>
                         </div>
-                    `;
+                    </div>
+                `;
+            });
+            
+            fileListElement.innerHTML = fileListHTML;
+            
+            // 添加文件选择事件监听器
+            document.querySelectorAll('.file-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    // 如果点击的是下载按钮，则直接处理下载
+                    if (e.target.classList.contains('download-btn') || 
+                        e.target.parentElement.classList.contains('download-btn')) {
+                        handleDownloadClick(this);
+                        return;
+                    }
                     
-                    fileListElement.appendChild(fileItem);
-                });
-                
-                // 添加下载和删除事件监听器
-                document.querySelectorAll('.download-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const index = parseInt(this.dataset.index);
-                        
-                        // 切换到下载标签页并选择文件
-                        tabElements.forEach(t => t.classList.remove('active'));
-                        tabContentElements.forEach(t => t.classList.remove('active'));
-                        document.querySelector('.tab[data-tab="download"]').classList.add('active');
-                        document.getElementById('download-tab').classList.add('active');
-                        
-                        // 选择文件
-                        setTimeout(() => {
-                            document.querySelectorAll('.file-item').forEach(item => {
-                                item.classList.remove('selected');
-                                if (parseInt(item.dataset.index) === index) {
-                                    item.classList.add('selected');
-                                }
-                            });
-                        }, 100);
+                    // 否则选择文件
+                    document.querySelectorAll('.file-item').forEach(i => {
+                        i.classList.remove('selected');
                     });
+                    this.classList.add('selected');
+                    selectedFile = {
+                        name: this.querySelector('.file-name').textContent.trim(),
+                        path: this.dataset.path
+                    };
                 });
-                
-                document.querySelectorAll('.delete-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const index = parseInt(this.dataset.index);
-                        if (confirm(`确定要删除文件 "${fileStorage.getFile(index).name}" 吗？`)) {
-                            fileStorage.deleteFile(index);
-                            renderFileLists();
-                        }
-                    });
-                });
+            });
+        }
+        
+        // 处理下载按钮点击
+        function handleDownloadClick(fileItem) {
+            document.querySelectorAll('.file-item').forEach(i => {
+                i.classList.remove('selected');
+            });
+            fileItem.classList.add('selected');
+            selectedFile = {
+                name: fileItem.querySelector('.file-name').textContent.trim(),
+                path: fileItem.dataset.path
+            };
+            
+            // 触发密码输入
+            downloadPasswordInput.focus();
+        }
+        
+        // 获取文件扩展名
+        function getFileExtension(filename) {
+            return filename.split('.').pop().toLowerCase();
+        }
+        
+        // 获取文件图标
+        function getFileIcon(extension) {
+            const iconMap = {
+                'pdf': 'fa-file-pdf',
+                'doc': 'fa-file-word',
+                'docx': 'fa-file-word',
+                'xls': 'fa-file-excel',
+                'xlsx': 'fa-file-excel',
+                'ppt': 'fa-file-powerpoint',
+                'pptx': 'fa-file-powerpoint',
+                'txt': 'fa-file-alt',
+                'zip': 'fa-file-archive',
+                'rar': 'fa-file-archive',
+                'jpg': 'fa-file-image',
+                'jpeg': 'fa-file-image',
+                'png': 'fa-file-image',
+                'gif': 'fa-file-image',
+                'mp3': 'fa-file-audio',
+                'wav': 'fa-file-audio',
+                'mp4': 'fa-file-video',
+                'avi': 'fa-file-video',
+                'mov': 'fa-file-video',
+                'js': 'fa-file-code',
+                'html': 'fa-file-code',
+                'css': 'fa-file-code',
+                'json': 'fa-file-code'
+            };
+            
+            return iconMap[extension] || 'fa-file';
+        }
+        
+        // 显示错误信息
+        function showError(element, message) {
+            if (element) {
+                element.textContent = message;
+                element.style.display = 'block';
+            } else {
+                alert(message);
             }
         }
         
-        // 格式化文件大小
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        // 隐藏错误信息
+        function hideError(element) {
+            if (element) {
+                element.textContent = '';
+                element.style.display = 'none';
+            }
         }
-        
-        // 初始化文件列表
-        renderFileLists();
     </script>
 </body>
 </html>
