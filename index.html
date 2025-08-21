@@ -3,1002 +3,615 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub仓库文件浏览器</title>
-    <link rel="stylesheet" href=" https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css ">
+    <title>GitHub文件下载器</title>
     <style>
-        :root {
-            --primary-color: #3498db;
-            --secondary-color: #2980b9;
-            --success-color: #2ecc71;
-            --danger-color: #e74c3c;
-            --warning-color: #f39c12;
-            --light-color: #ecf0f1;
-            --dark-color: #34495e;
-            --background-color: #f5f7fa;
-            --card-color: #ffffff;
-            --text-color: #333333;
-            --border-color: #dddddd;
-        }
-        
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
-            background-color: var(--background-color);
-            color: var(--text-color);
+            background-color: #f5f8fa;
+            color: #24292e;
             line-height: 1.6;
             padding: 20px;
-            min-height: 100vh;
         }
         
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
-            background: var(--card-color);
+            background: white;
             border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             overflow: hidden;
         }
         
         header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
             color: white;
-            padding: 20px;
+            padding: 30px 40px;
             text-align: center;
         }
         
         h1 {
-            font-size: 28px;
+            font-size: 2.5rem;
             margin-bottom: 10px;
         }
         
-        .description {
-            font-size: 16px;
+        .subtitle {
+            font-size: 1.1rem;
             opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
         }
         
-        .content {
-            padding: 30px;
+        .repo-info {
+            background-color: #f6f8fa;
+            padding: 20px;
+            border-bottom: 1px solid #e1e4e8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
         }
         
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--dark-color);
-        }
-        
-        input[type="text"],
-        input[type="password"] {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid var(--border-color);
+        .repo-url {
+            font-family: monospace;
+            background-color: #e1e4e8;
+            padding: 8px 15px;
             border-radius: 5px;
-            font-size: 16px;
-            transition: border-color 0.3s;
+            font-size: 0.9rem;
+            word-break: break-all;
         }
         
-        input:focus {
-            border-color: var(--primary-color);
-            outline: none;
+        .controls {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            border-bottom: 1px solid #e1e4e8;
         }
         
         .btn {
-            display: block;
-            width: 100%;
-            padding: 14px;
-            background: var(--primary-color);
+            background: linear-gradient(to right, #2ecc71, #27ae60);
             color: white;
             border: none;
+            padding: 12px 25px;
             border-radius: 5px;
-            font-size: 16px;
-            font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s;
-            text-align: center;
-            margin-top: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .btn:hover {
-            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
         
-        .btn-success {
-            background: var(--success-color);
+        .btn-download-all {
+            background: linear-gradient(to right, #3498db, #2980b9);
         }
         
-        .btn-success:hover {
-            background: #27ae60;
-        }
-        
-        .btn-danger {
-            background: var(--danger-color);
-        }
-        
-        .btn-danger:hover {
-            background: #c0392b;
-        }
-        
-        .btn-warning {
-            background: var(--warning-color);
-        }
-        
-        .btn-warning:hover {
-            background: #e67e22;
+        .btn-refresh {
+            background: linear-gradient(to right, #9b59b6, #8e44ad);
         }
         
         .file-list {
-            margin-top: 20px;
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-            max-height: 400px;
-            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e1e4e8;
+        }
+        
+        .files-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
         }
         
         .file-item {
-            padding: 12px 15px;
-            border-bottom: 1px solid var(--border-color);
+            background: #f8f9fa;
+            border: 1px solid #e1e4e8;
+            border-radius: 8px;
+            padding: 15px;
+            transition: all 0.3s ease;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         
-        .file-item:last-child {
-            border-bottom: none;
+        .file-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-color: #c3c6cc;
         }
         
-        .file-item.selected {
-            background-color: rgba(52, 152, 219, 0.1);
-        }
-        
-        .file-name {
-            flex: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        
-        .file-actions {
+        .file-info {
             display: flex;
+            align-items: center;
             gap: 10px;
         }
         
-        .action-btn {
-            padding: 6px 12px;
+        .file-icon {
+            width: 24px;
+            height: 24px;
+            background-color: #3498db;
             border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: white;
+            font-size: 14px;
+        }
+        
+        .file-icon.dir {
+            background-color: #9b59b6;
+        }
+        
+        .file-name {
+            font-weight: 500;
+        }
+        
+        .file-size {
+            font-size: 0.85rem;
+            color: #6a737d;
         }
         
         .download-btn {
-            background: var(--primary-color);
+            background-color: #e1e4e8;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
         
-        .delete-btn {
-            background: var(--danger-color);
-        }
-        
-        .progress-container {
-            margin-top: 15px;
-            display: none;
-        }
-        
-        .progress-bar {
-            height: 10px;
-            background: #e0e0e0;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-        
-        .progress {
-            height: 100%;
-            background: var(--primary-color);
-            width: 0%;
-            transition: width 0.3s;
+        .download-btn:hover {
+            background-color: #3498db;
+            color: white;
         }
         
         .status {
-            margin-top: 10px;
-            font-weight: 600;
+            padding: 20px;
             text-align: center;
+            color: #6a737d;
         }
         
-        .empty-state {
+        .loading {
+            display: none;
             text-align: center;
-            padding: 20px;
-            color: #7f8c8d;
+            padding: 30px;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #3498db;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
         footer {
             text-align: center;
             padding: 20px;
-            color: #7f8c8d;
-            font-size: 14px;
-            border-top: 1px solid #eee;
+            color: #6a737d;
+            font-size: 0.9rem;
+            border-top: 1px solid #e1e4e8;
         }
         
-        .error-message {
-            color: var(--danger-color);
-            background-color: #fce4e2;
-            border: 1px solid #f5c2c7;
-            border-radius: 4px;
-            padding: 10px;
-            margin-top: 10px;
-            display: none;
-        }
-        
-        .github-info {
-            background: #f8f9fa;
-            border: 1px solid #e1e4e8;
-            border-radius: 5px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .github-info h3 {
-            margin-bottom: 10px;
-            color: var(--dark-color);
-        }
-        
-        .github-info p {
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-        
-        .github-info code {
-            background: #f1f2f4;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: monospace;
-        }
-        
-        .password-container {
-            position: relative;
-        }
-        
-        .toggle-password {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #777;
-        }
-        
-        .error-details {
-            background-color: #fff8f8;
-            border-left: 4px solid var(--danger-color);
-            padding: 15px;
-            margin-top: 20px;
-            display: none;
-        }
-        
-        .error-details h3 {
-            color: var(--danger-color);
-            margin-bottom: 10px;
-        }
-        
-        .error-details ul {
-            padding-left: 20px;
-        }
-        
-        .error-details li {
-            margin-bottom: 8px;
-        }
-        
-        .saved-repos {
-            margin-top: 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-            padding: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        
-        .repo-item {
+        .token-container {
             display: flex;
-            justify-content: space-between;
+            gap: 10px;
             align-items: center;
-            padding: 8px;
-            border-bottom: 1px solid #eee;
         }
         
-        .repo-item:last-child {
-            border-bottom: none;
+        .token-input {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            width: 250px;
         }
         
-        .repo-info {
-            flex: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+        .rate-limit {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            margin-top: 5px;
         }
         
-        .repo-actions {
-            display: flex;
-            gap: 5px;
-        }
-        
-        .action-btn-small {
-            padding: 4px 8px;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-            border: none;
-            color: white;
-        }
-        
-        .load-btn {
-            background: var(--primary-color);
-        }
-        
-        .remove-btn {
-            background: var(--danger-color);
-        }
-        
-        @media (max-width: 600px) {
-            .container {
-                border-radius: 0;
-            }
-            
-            .content {
-                padding: 20px;
-            }
-            
-            .file-item {
+        @media (max-width: 768px) {
+            .controls {
                 flex-direction: column;
-                align-items: flex-start;
+                align-items: stretch;
             }
             
-            .file-actions {
-                margin-top: 10px;
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .repo-info {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .files-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .token-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .token-input {
                 width: 100%;
             }
-            
-            .action-btn {
-                flex: 1;
-            }
-        }
-        
-        .file-icon {
-            margin-right: 8px;
-            color: var(--primary-color);
-        }
-        
-        .tabs {
-            display: flex;
-            background: var(--light-color);
-            margin-bottom: 20px;
-        }
-        
-        .tab {
-            flex: 1;
-            padding: 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 600;
-        }
-        
-        .tab.active {
-            background: white;
-            color: var(--primary-color);
-            border-bottom: 3px solid var(--primary-color);
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        .api-status {
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            display: none;
-        }
-        
-        .api-status.success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .api-status.error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>GitHub仓库文件浏览器</h1>
-            <p class="description">解决404错误的完整解决方案</p>
+            <h1>GitHub文件下载器</h1>
+            <p class="subtitle">通过GitHub API直接下载仓库中的文件和文件夹</p>
         </header>
         
-        <div class="tabs">
-            <div class="tab active" data-tab="download">浏览仓库</div>
-            <div class="tab" data-tab="settings">设置</div>
+        <div class="repo-info">
+            <div>
+                <strong>仓库地址：</strong>
+                <span class="repo-url"> https://api.github.com/repos/FelixTONG1990/IM_800V_ASW/contents/</span>
+            </div>
+            <button id="refreshBtn" class="btn btn-refresh">
+                <span>↻</span> 刷新列表
+            </button>
         </div>
         
-        <div class="content">
-            <div class="tab-content active" id="download-tab">
-                <div class="github-info">
-                    <h3><i class="fab fa-github"></i> GitHub仓库信息</h3>
-                    <p>输入您的GitHub仓库信息以加载文件列表</p>
-                </div>
-                
-                <div class="api-status" id="api-status"></div>
-                
-                <div class="form-group">
-                    <label for="github-owner">仓库所有者</label>
-                    <input type="text" id="github-owner" placeholder="输入GitHub用户名或组织名" value="octocat">
-                </div>
-                
-                <div class="form-group">
-                    <label for="github-repo">仓库名称</label>
-                    <input type="text" id="github-repo" placeholder="输入GitHub仓库名称" value="Spoon-Knife">
-                </div>
-                
-                <div class="form-group">
-                    <label for="github-path">仓库路径 (可选)</label>
-                    <input type="text" id="github-path" placeholder="输入仓库内的路径，如: docs/files">
-                </div>
-                
-                <div class="form-group">
-                    <label for="github-token">GitHub访问令牌 (可选)</label>
-                    <input type="password" id="github-token" placeholder="输入GitHub个人访问令牌(PAT)">
-                    <p class="description">添加令牌可提高API请求限额(每小时5000次)，未认证用户每小时仅60次请求</p>
-                </div>
-                
-                <button class="btn" id="load-files-btn">
-                    <i class="fas fa-sync-alt"></i> 加载文件列表
+        <div class="controls">
+            <div class="token-container">
+                <input type="password" id="tokenInput" class="token-input" placeholder="输入GitHub令牌(可选)">
+                <button id="applyTokenBtn" class="btn">
+                    <span>💾</span> 应用令牌
                 </button>
-                
-                <div class="form-group">
-                    <label>仓库文件列表</label>
-                    <div class="file-list" id="file-list">
-                        <div class="empty-state">请先输入仓库信息并加载文件</div>
-                    </div>
-                </div>
-                
-                <div class="error-details" id="error-details">
-                    <h3><i class="fas fa-exclamation-triangle"></i> 无法加载文件列表的原因</h3>
-                    <ul id="error-list">
-                        <li>仓库不存在或路径错误</li>
-                        <li>仓库设置为私有（GitHub Pages仅支持公开仓库）</li>
-                        <li>API请求次数超限（每小时60次）</li>
-                        <li>仓库名称或所有者拼写错误</li>
-                        <li>路径包含特殊字符或空格</li>
-                        <li>GitHub服务暂时不可用</li>
-                    </ul>
-                </div>
             </div>
             
-            <div class="tab-content" id="settings-tab">
-                <div class="github-info">
-                    <h3><i class="fas fa-cog"></i> 系统设置</h3>
-                    <p>管理保存的仓库配置和系统选项</p>
-                </div>
-                
-                <div class="form-group">
-                    <label for="system-password">系统密码</label>
-                    <input type="password" id="system-password" placeholder="输入系统管理密码">
-                    <div class="error-message" id="system-password-error"></div>
-                </div>
-                
-                <div class="form-group">
-                    <button class="btn" id="save-config-btn">
-                        <i class="fas fa-save"></i> 保存当前配置
-                    </button>
-                </div>
-                
-                <div class="form-group">
-                    <label>已保存的仓库配置>
-                    <div class="saved-repos" id="saved-repos">
-                        <div class="empty-state">没有保存的仓库配置</div>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <button class="btn btn-danger" id="clear-config-btn">
-                        <i class="fas fa-trash-alt"></i> 清除所有配置
-                    </button>
-                </div>
+            <button id="downloadAllBtn" class="btn btn-download-all">
+                <span>⬇</span> 下载所有文件
+            </button>
+            <div>
+                <input type="checkbox" id="includeDirs" checked>
+                <label for="includeDirs">包含文件夹</label>
             </div>
+        </div>
+        
+        <div class="rate-limit" id="rateLimitInfo">
+            剩余请求: 加载中... | 重置时间: 加载中...
+        </div>
+        
+        <div class="loading" id="loadingIndicator">
+            <div class="spinner"></div>
+            <p>正在加载文件列表...</p>
+        </div>
+        
+        <div class="file-list">
+            <h2 class="section-title">文件列表</h2>
+            <div class="files-container" id="filesContainer">
+                <!-- 文件列表将通过JavaScript动态生成 -->
+            </div>
+        </div>
+        
+        <div class="status" id="statusMessage">
+            准备加载文件列表...
         </div>
         
         <footer>
-            <p>安全提示：所有操作均在您的浏览器中完成，不会上传到任何服务器</p>
-            <p>© 2025 GitHub仓库文件浏览器 | 使用GitHub API v3</p>
+            <p>GitHub文件下载器 &copy; 2025 | 使用GitHub API获取仓库内容</p>
         </footer>
     </div>
 
     <script>
-        // DOM元素
-        const githubOwnerInput = document.getElementById('github-owner');
-        const githubRepoInput = document.getElementById('github-repo');
-        const githubPathInput = document.getElementById('github-path');
-        const githubTokenInput = document.getElementById('github-token');
-        const loadFilesBtn = document.getElementById('load-files-btn');
-        const fileListElement = document.getElementById('file-list');
-        const errorDetails = document.getElementById('error-details');
-        const errorList = document.getElementById('error-list');
-        const systemPasswordInput = document.getElementById('system-password');
-        const systemPasswordError = document.getElementById('system-password-error');
-        const saveConfigBtn = document.getElementById('save-config-btn');
-        const savedReposElement = document.getElementById('saved-repos');
-        const clearConfigBtn = document.getElementById('clear-config-btn');
-        const tabElements = document.querySelectorAll('.tab');
-        const tabContentElements = document.querySelectorAll('.tab-content');
-        const apiStatusElement = document.getElementById('api-status');
-        
-        // 存储当前选中的文件和文件列表
-        let selectedFile = null;
-        let filesList = [];
-        
-        // 预设密码
-        const SYSTEM_PASSWORD = "admin123";
-        
-        // 标签切换功能
-        tabElements.forEach(tab => {
-            tab.addEventListener('click', () => {
-                // 移除所有活动标签
-                tabElements.forEach(t => t.classList.remove('active'));
-                tabContentElements.forEach(t => t.classList.remove('active'));
-                
-                // 添加当前活动标签
-                tab.classList.add('active');
-                document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
-                
-                // 切换到设置标签页时加载保存的仓库
-                if (tab.dataset.tab === 'settings') {
-                    renderSavedRepos();
-                }
-            });
-        });
-        
-        // 加载文件列表
-        loadFilesBtn.addEventListener('click', async function() {
-            const owner = githubOwnerInput.value.trim();
-            const repo = githubRepoInput.value.trim();
-            const path = githubPathInput.value.trim();
-            const token = githubTokenInput.value.trim();
-            
-            if (!owner || !repo) {
-                showApiStatus('error', '请填写仓库所有者和仓库名称');
-                return;
-            }
-            
-            try {
-                // 显示加载状态
-                loadFilesBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 加载中...';
-                loadFilesBtn.disabled = true;
-                
-                // 隐藏之前的错误详情
-                hideErrorDetails();
-                
-                // 获取仓库文件列表
-                filesList = await getRepoFiles(owner, repo, path, token);
-                
-                // 渲染文件列表
-                renderFileList(filesList);
-                
-                // 显示API状态
-                showApiStatus('success', '文件列表加载成功！');
-                
-                // 重置按钮状态
-                loadFilesBtn.innerHTML = '<i class="fas fa-sync-alt"></i> 加载文件列表';
-                loadFilesBtn.disabled = false;
-            } catch (error) {
-                console.error('加载文件列表失败:', error);
-                showApiStatus('error', error.message || '加载文件列表失败');
-                showErrorDetails();
-                
-                // 重置按钮状态
-                loadFilesBtn.innerHTML = '<i class="fas fa-sync-alt"></i> 加载文件列表';
-                loadFilesBtn.disabled = false;
-            }
-        });
-        
-        // 保存当前配置
-        saveConfigBtn.addEventListener('click', function() {
-            const systemPassword = systemPasswordInput.value;
-            if (systemPassword !== SYSTEM_PASSWORD) {
-                showError(systemPasswordError, '系统密码错误');
-                return;
-            }
-            
-            const owner = githubOwnerInput.value.trim();
-            const repo = githubRepoInput.value.trim();
-            const path = githubPathInput.value.trim();
-            
-            if (!owner || !repo) {
-                showError(systemPasswordError, '请填写仓库所有者和仓库名称');
-                return;
-            }
-            
-            // 保存配置到localStorage
-            const repoConfig = {
-                owner,
-                repo,
-                path,
-                timestamp: new Date().toISOString()
-            };
-            
-            let savedRepos = JSON.parse(localStorage.getItem('savedRepos')) || [];
-            savedRepos.push(repoConfig);
-            localStorage.setItem('savedRepos', JSON.stringify(savedRepos));
-            
-            // 更新UI
-            renderSavedRepos();
-            
-            // 清除密码和错误
-            systemPasswordInput.value = '';
-            hideError(systemPasswordError);
-            
-            alert('配置保存成功！');
-        });
-        
-        // 清除所有配置
-        clearConfigBtn.addEventListener('click', function() {
-            const systemPassword = systemPasswordInput.value;
-            if (systemPassword !== SYSTEM_PASSWORD) {
-                showError(systemPasswordError, '系统密码错误');
-                return;
-            }
-            
-            if (confirm('确定要清除所有保存的仓库配置吗？此操作不可撤销！')) {
-                localStorage.removeItem('savedRepos');
-                renderSavedRepos();
-                systemPasswordInput.value = '';
-                hideError(systemPasswordError);
-                alert('所有配置已清除！');
-            }
-        });
-        
-        // 修复后的API请求函数
-        async function getRepoFiles(owner, repo, path = '', token = '') {
-            // 关键修复：正确构造API URL
-            const apiUrl = ` https://api.github.com/repos/$ {owner}/${repo}/contents/${encodeURIComponent(path)}`;
-            
-            // 添加认证头部（解决权限和速率限制问题）
-            const headers = {
-                'Accept': 'application/vnd.github.v3+json'
-            };
-            
-            if (token) {
-                headers['Authorization'] = `token ${token}`;
-            }
+        document.addEventListener('DOMContentLoaded', function() {
+            // 核心变量
+            const apiUrl = ' https://api.github.com/repos/FelixTONG1990/IM_800V_ASW/contents/ ';
+            const defaultToken = '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';
+            let currentToken = defaultToken;
+            let rateLimitRemaining = 5000;
+            let rateLimitReset = 0;
 
-            try {
-                const response = await fetch(apiUrl, {
-                    headers,
-                    mode: 'cors' // 显式声明跨域请求
-                });
-
-                // 增强错误处理（显示具体状态码）
-                if (!response.ok) {
-                    let errorMsg = `请求失败 (HTTP ${response.status}): `;
-                    switch(response.status) {
-                        case 401: 
-                            errorMsg += "认证失败，请检查PAT权限";
-                            break;
-                        case 403: 
-                            errorMsg += "API限制或无权访问";
-                            // 检查速率限制头部
-                            const remaining = response.headers.get('X-RateLimit-Remaining');
-                            if (remaining === "0") {
-                                const resetTime = new Date(parseInt(response.headers.get('X-RateLimit-Reset')) * 1000);
-                                errorMsg += `，请求次数已用尽，重置时间: ${resetTime.toLocaleTimeString()}`;
-                            }
-                            break;
-                        case 404: 
-                            errorMsg += "仓库不存在或路径错误";
-                            // 添加详细诊断信息
-                            errorMsg += `。请检查: 
-                            - 仓库所有者: ${owner}
-                            - 仓库名称: ${repo}
-                            - 路径: ${path}
-                            - 是否私有仓库: ${token ? "是" : "否"}`;
-                            break;
-                        default: 
-                            errorMsg += await response.text();
+            // DOM元素引用
+            const filesContainer = document.getElementById('filesContainer');
+            const statusMessage = document.getElementById('statusMessage');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const refreshBtn = document.getElementById('refreshBtn');
+            const downloadAllBtn = document.getElementById('downloadAllBtn');
+            const includeDirsCheckbox = document.getElementById('includeDirs');
+            const tokenInput = document.getElementById('tokenInput');
+            const applyTokenBtn = document.getElementById('applyTokenBtn');
+            const rateLimitInfo = document.getElementById('rateLimitInfo');
+            
+            // 获取文件列表（带速率限制处理）
+            async function fetchFiles() {
+                showLoading();
+                statusMessage.textContent = '正在从GitHub加载文件列表...';
+                
+                try {
+                    const headers = {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    };
+                    
+                    const response = await fetchWithRateLimit(apiUrl, headers);
+                    
+                    if (!response.ok) {
+                        if (response.status === 403) {
+                            return handleRateLimitError(response);
+                        }
+                        throw new Error(`GitHub API错误: ${response.status} ${response.statusText}`);
                     }
-                    throw new Error(errorMsg);
+                    
+                    // 更新速率限制状态
+                    updateRateLimitState(response.headers);
+                    
+                    const data = await response.json();
+                    displayFiles(data);
+                    statusMessage.textContent = `成功加载 ${data.length} 个项目`;
+                } catch (error) {
+                    console.error('获取文件列表失败:', error);
+                    statusMessage.textContent = `错误: ${error.message}`;
+                    filesContainer.innerHTML = `<div class="file-item">${error.message}</div>`;
+                } finally {
+                    hideLoading();
                 }
+            }
 
-                const data = await response.json();
-                // 过滤非文件项（目录/submodule等）
-                return data.filter(item => item.type === "file");
-            } catch (error) {
-                // 网络错误处理
-                if (error.message.includes("Failed to fetch")) {
-                    throw new Error("网络连接失败，请检查代理设置");
+            // 带速率限制处理的fetch
+            async function fetchWithRateLimit(url, headers) {
+                if (rateLimitRemaining <= 1) {
+                    const waitTime = calculateWaitTime();
+                    statusMessage.textContent = `速率限制已达，等待 ${waitTime} 秒后重试...`;
+                    await wait(waitTime * 1000);
                 }
-                throw error;
-            }
-        }
-
-        // 渲染文件列表
-        function renderFileList(files) {
-            if (!files || files.length === 0) {
-                fileListElement.innerHTML = '<div class="empty-state">该仓库中没有文件</div>';
-                return;
-            }
-            
-            let fileListHTML = '';
-            files.forEach(file => {
-                const fileExtension = getFileExtension(file.name);
-                const iconClass = getFileIcon(fileExtension);
                 
-                fileListHTML += `
-                    <div class="file-item" data-path="${file.path}">
-                        <div class="file-name">
-                            <i class="fas ${iconClass} file-icon"></i>
-                            ${file.name}
-                        </div>
-                        <div class="file-actions">
-                            <button class="action-btn download-btn" data-path="${file.path}">下载</button>
-                        </div>
-                    </div>
-                `;
-            });
+                return await fetch(url, { headers });
+            }
+
+            // 处理速率限制错误
+            function handleRateLimitError(response) {
+                const resetTime = response.headers.get('X-RateLimit-Reset');
+                const waitTime = resetTime ? Math.max(1, resetTime - Math.floor(Date.now() / 1000)) : 60;
+                
+                statusMessage.textContent = `API速率限制已达，等待 ${waitTime} 秒后自动重试...`;
+                
+                return new Promise((resolve) => {
+                    setTimeout(async () => {
+                        resolve(await fetchFiles());
+                    }, waitTime * 1000);
+                });
+            }
+
+            // 更新速率限制状态
+            function updateRateLimitState(headers) {
+                rateLimitRemaining = parseInt(headers.get('X-RateLimit-Remaining')) || 0;
+                rateLimitReset = parseInt(headers.get('X-RateLimit-Reset')) || 0;
+                
+                // 更新UI显示
+                const resetTime = new Date(rateLimitReset * 1000).toLocaleTimeString();
+                rateLimitInfo.textContent = `剩余请求: ${rateLimitRemaining} | 重置时间: ${resetTime}`;
+            }
+
+            // 计算等待时间
+            function calculateWaitTime() {
+                if (rateLimitReset > 0) {
+                    const currentTime = Math.floor(Date.now() / 1000);
+                    return Math.max(1, rateLimitReset - currentTime);
+                }
+                return 60; // 默认等待60秒
+            }
+
+            // 等待函数
+            function wait(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
+            // 显示文件列表
+            function displayFiles(files) {
+                filesContainer.innerHTML = '';
+                
+                if (!files || files.length === 0) {
+                    filesContainer.innerHTML = '<div class="file-item">该目录下没有文件或文件夹</div>';
+                    return;
+                }
+                
+                // 分别处理文件和文件夹
+                const directories = files.filter(item => item.type === 'dir');
+                const fileItems = files.filter(item => item.type === 'file');
+                
+                // 显示文件夹
+                if (directories.length > 0 && includeDirsCheckbox.checked) {
+                    const dirsSection = document.createElement('div');
+                    dirsSection.innerHTML = `<h3 class="section-title">文件夹 (${directories.length})</h3>`;
+                    filesContainer.appendChild(dirsSection);
+                    
+                    directories.forEach(dir => {
+                        const dirElement = createFileElement(dir);
+                        dirsSection.appendChild(dirElement);
+                    });
+                }
+                
+                // 显示文件
+                if (fileItems.length > 0) {
+                    const filesSection = document.createElement('div');
+                    filesSection.innerHTML = `<h3 class="section-title">文件 (${fileItems.length})</h3>`;
+                    filesContainer.appendChild(filesSection);
+                    
+                    fileItems.forEach(file => {
+                        const fileElement = createFileElement(file);
+                        filesSection.appendChild(fileElement);
+                    });
+                }
+            }
             
-            fileListElement.innerHTML = fileListHTML;
+            // 创建文件/文件夹元素
+            function createFileElement(item) {
+                const fileElement = document.createElement('div');
+                fileElement.className = 'file-item';
+                
+                const fileInfo = document.createElement('div');
+                fileInfo.className = 'file-info';
+                
+                const icon = document.createElement('div');
+                icon.className = `file-icon ${item.type === 'dir' ? 'dir' : ''}`;
+                icon.textContent = item.type === 'dir' ? '📁' : '📄';
+                
+                const name = document.createElement('div');
+                name.className = 'file-name';
+                name.textContent = item.name;
+                
+                fileInfo.appendChild(icon);
+                fileInfo.appendChild(name);
+                
+                const actions = document.createElement('div');
+                
+                if (item.type === 'file') {
+                    const downloadBtn = document.createElement('button');
+                    downloadBtn.className = 'download-btn';
+                    downloadBtn.title = '下载文件';
+                    downloadBtn.innerHTML = '⬇';
+                    downloadBtn.onclick = () => downloadFile(item);
+                    actions.appendChild(downloadBtn);
+                } else {
+                    const dirLabel = document.createElement('span');
+                    dirLabel.textContent = '文件夹';
+                    dirLabel.style.color = '#6a737d';
+                    dirLabel.style.fontSize = '0.9rem';
+                    actions.appendChild(dirLabel);
+                }
+                
+                fileElement.appendChild(fileInfo);
+                fileElement.appendChild(actions);
+                
+                return fileElement;
+            }
             
-            // 添加文件选择事件监听器
-            document.querySelectorAll('.file-item').forEach(item => {
-                item.addEventListener('click', function(e) {
-                    // 如果点击的是下载按钮，则直接处理下载
-                    if (e.target.classList.contains('download-btn') || 
-                        e.target.parentElement.classList.contains('download-btn')) {
-                        handleDownloadClick(this);
+            // 下载单个文件（带速率限制处理）
+            async function downloadFile(file) {
+                try {
+                    statusMessage.textContent = `正在下载: ${file.name}...`;
+                    
+                    const headers = {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Accept': 'application/vnd.github.v3.raw'
+                    };
+                    
+                    const response = await fetchWithRateLimit(file.download_url, headers);
+                    
+                    if (!response.ok) throw new Error(`下载失败: ${response.status}`);
+                    
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = file.name;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                    
+                    statusMessage.textContent = `下载完成: ${file.name} | 剩余请求: ${rateLimitRemaining}`;
+                } catch (error) {
+                    statusMessage.textContent = `下载错误: ${error.message}`;
+                }
+            }
+
+            // 下载所有文件（带速率限制处理）
+            async function downloadAllFiles() {
+                showLoading();
+                statusMessage.textContent = '正在准备下载所有文件...';
+                
+                try {
+                    const headers = {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    };
+                    
+                    const response = await fetchWithRateLimit(apiUrl, headers);
+                    
+                    if (!response.ok) throw new Error(`API错误: ${response.status}`);
+                    
+                    updateRateLimitState(response.headers);
+                    
+                    const data = await response.json();
+                    const files = data.filter(item => item.type === 'file');
+                    
+                    if (files.length === 0) {
+                        statusMessage.textContent = '没有可下载的文件';
                         return;
                     }
                     
-                    // 否则选择文件
-                    document.querySelectorAll('.file-item').forEach(i => {
-                        i.classList.remove('selected');
-                    });
-                    this.classList.add('selected');
-                    selectedFile = {
-                        name: this.querySelector('.file-name').textContent.trim(),
-                        path: this.dataset.path
-                    };
-                });
-            });
-        }
-        
-        // 处理下载按钮点击
-        function handleDownloadClick(fileItem) {
-            document.querySelectorAll('.file-item').forEach(i => {
-                i.classList.remove('selected');
-            });
-            fileItem.classList.add('selected');
-            selectedFile = {
-                name: fileItem.querySelector('.file-name').textContent.trim(),
-                path: fileItem.dataset.path
-            };
-            
-            // 下载文件
-            downloadFile(selectedFile);
-        }
-        
-        // 下载文件
-        async function downloadFile(file) {
-            const owner = githubOwnerInput.value.trim();
-            const repo = githubRepoInput.value.trim();
-            
-            if (!owner || !repo) {
-                showApiStatus('error', '请先填写仓库所有者和仓库名称');
-                return;
-            }
-            
-            try {
-                // 关键修复：使用raw.githubusercontent.com直接下载文件
-                const rawUrl = ` https://raw.githubusercontent.com/$ {owner}/${repo}/main/${encodeURIComponent(file.path)}`;
-                
-                const response = await fetch(rawUrl);
-                if (!response.ok) {
-                    throw new Error(`下载失败: ${response.status} ${response.statusText}`);
-                }
-                
-                const blob = await response.blob();
-                const url = URL.createObjectURL(blob);
-                
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = file.name;
-                document.body.appendChild(a);
-                a.click();
-                
-                // 清理
-                setTimeout(() => {
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                    showApiStatus('success', `文件 "${file.name}" 下载成功！`);
-                }, 100);
-            } catch (error) {
-                console.error('下载失败:', error);
-                showApiStatus('error', error.message || '文件下载失败');
-            }
-        }
-        
-        // 获取文件扩展名
-        function getFileExtension(filename) {
-            return filename.split('.').pop().toLowerCase();
-        }
-        
-        // 获取文件图标
-        function getFileIcon(extension) {
-            const iconMap = {
-                'pdf': 'fa-file-pdf',
-                'doc': 'fa-file-word',
-                'docx': 'fa-file-word',
-                'xls': 'fa-file-excel',
-                'xlsx': 'fa-file-excel',
-                'ppt': 'fa-file-powerpoint',
-                'pptx': 'fa-file-powerpoint',
-                'txt': 'fa-file-alt',
-                'zip': 'fa-file-archive',
-                'rar': 'fa-file-archive',
-                'jpg': 'fa-file-image',
-                'jpeg': 'fa-file-image',
-                'png': 'fa-file-image',
-                'gif': 'fa-file-image',
-                'mp3': 'fa-file-audio',
-                'wav': 'fa-file-audio',
-                'mp4': 'fa-file-video',
-                'avi': 'fa-file-video',
-                'mov': 'fa-file-video',
-                'js': 'fa-file-code',
-                'html': 'fa-file-code',
-                'css': 'fa-file-code',
-                'json': 'fa-file-code'
-            };
-            
-            return iconMap[extension] || 'fa-file';
-        }
-        
-        // 渲染保存的仓库配置
-        function renderSavedRepos() {
-            const savedRepos = JSON.parse(localStorage.getItem('savedRepos')) || [];
-            
-            if (savedRepos.length === 0) {
-                savedReposElement.innerHTML = '<div class="empty-state">没有保存的仓库配置</div>';
-                return;
-            }
-            
-            let reposHTML = '';
-            savedRepos.forEach((repo, index) => {
-                const repoName = `${repo.owner}/${repo.repo}`;
-                const pathInfo = repo.path ? `路径: ${repo.path}` : '根目录';
-                const date = new Date(repo.timestamp).toLocaleString();
-                
-                reposHTML += `
-                    <div class="repo-item">
-                        <div class="repo-info">
-                            <strong>${repoName}</strong>
-                            <div>${pathInfo} | ${date}</div>
-                        </div>
-                        <div class="repo-actions">
-                            <button class="action-btn-small load-btn" data-index="${index}">加载</button>
-                            <button class="action-btn-small remove-btn" data-index="${index}">删除</button>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            savedReposElement.innerHTML = reposHTML;
-            
-            // 添加事件监听器
-            document.querySelectorAll('.load-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const index = parseInt(this.dataset.index);
-                    const repo = savedRepos[index];
+                    statusMessage.textContent = `开始下载 ${files.length} 个文件 | 剩余请求: ${rateLimitRemaining}...`;
                     
-                    githubOwnerInput.value = repo.owner;
-                    githubRepoInput.value = repo.repo;
-                    githubPathInput.value = repo.path || '';
-                    
-                    // 切换到下载标签页
-                    tabElements.forEach(t => t.classList.remove('active'));
-                    tabContentElements.forEach(t => t.classList.remove('active'));
-                    document.querySelector('.tab[data-tab="download"]').classList.add('active');
-                    document.getElementById('download-tab').classList.add('active');
-                    
-                    showApiStatus('info', `已加载仓库配置: ${repo.owner}/${repo.repo}`);
-                });
-            });
-            
-            document.querySelectorAll('.remove-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const index = parseInt(this.dataset.index);
-                    const repo = savedRepos[index];
-                    
-                    if (confirm(`确定要删除 ${repo.owner}/${repo.repo} 的配置吗？`)) {
-                        savedRepos.splice(index, 1);
-                        localStorage.setItem('savedRepos', JSON.stringify(savedRepos));
-                        renderSavedRepos();
+                    for (const file of files) {
+ downloadFile(file);
+                        // 在文件之间添加延迟以避免突发请求
+                        await wait(500);
                     }
-                });
+                    
+                    statusMessage.textContent = `成功下载 ${files.length} 个文件`;
+                } catch (error) {
+                    statusMessage.textContent = `下载失败: ${error.message}`;
+                } finally {
+                    hideLoading();
+                }
+            }
+
+            // 显示加载指示器
+            function showLoading() {
+                loadingIndicator.style.display = 'block';
+            }
+            
+            // 隐藏加载指示器
+            function hideLoading() {
+                loadingIndicator.style.display = 'none';
+            }
+            
+            // 事件监听
+            refreshBtn.addEventListener('click', fetchFiles);
+            downloadAllBtn.addEventListener('click', downloadAllFiles);
+            includeDirsCheckbox.addEventListener('change', fetchFiles);
+            applyTokenBtn.addEventListener('click', () => {
+                currentToken = tokenInput.value || defaultToken;
+                statusMessage.textContent = '令牌已更新，正在刷新列表...';
+                fetchFiles();
             });
-        }
-        
-        // 显示错误详情
-        function showErrorDetails() {
-            errorDetails.style.display = 'block';
-        }
-        
-        // 隐藏错误详情
-        function hideErrorDetails() {
-            errorDetails.style.display = 'none';
-        }
-        
-        // 显示API状态
-        function showApiStatus(type, message) {
-            apiStatusElement.textContent = message;
-            apiStatusElement.className = `api-status ${type}`;
-            apiStatusElement.style.display = 'block';
             
-            // 5秒后自动隐藏
-            setTimeout(() => {
-                apiStatusElement.style.display = 'none';
-            }, 5000);
-        }
-        
-        // 显示错误信息
-        function showError(element, message) {
-            if (element) {
-                element.textContent = message;
-                element.style.display = 'block';
-            } else {
-                alert(message);
-            }
-        }
-        
-        // 隐藏错误信息
-        function hideError(element) {
-            if (element) {
-                element.textContent = '';
-                element.style.display = 'none';
-            }
-        }
-        
-        // 初始化页面
-        function initPage() {
-            // 尝试加载上次使用的仓库配置
-            const lastRepo = JSON.parse(localStorage.getItem('lastRepo'));
-            if (lastRepo) {
-                githubOwnerInput.value = lastRepo.owner || '';
-                githubRepoInput.value = lastRepo.repo || '';
-                githubPathInput.value = lastRepo.path || '';
-            }
-            
-            // 默认隐藏错误详情
-            hideErrorDetails();
-        }
-        
-        // 页面加载完成后初始化
-        window.addEventListener('DOMContentLoaded', initPage);
+            // 初始加载
+            fetchFiles();
+        });
     </script>
 </body>
 </html>
