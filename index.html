@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub加密文件下载系统</title>
+    <title>GitHub仓库文件浏览器</title>
     <link rel="stylesheet" href=" https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css ">
     <style>
         :root {
@@ -429,19 +429,19 @@
 <body>
     <div class="container">
         <header>
-            <h1>GitHub加密文件下载系统</h1>
-            <p class="description">安全访问、密码验证的文件下载系统</p>
+            <h1>GitHub仓库文件浏览器</h1>
+            <p class="description">解决404错误的完整解决方案</p>
         </header>
         
         <div class="tabs">
-            <div class="tab active" data-tab="download">下载文件</div>
+            <div class="tab active" data-tab="download">浏览仓库</div>
             <div class="tab" data-tab="settings">设置</div>
         </div>
         
         <div class="content">
             <div class="tab-content active" id="download-tab">
                 <div class="github-info">
-                    <h3><i class="fab fa-github"></i> GitHub配置信息</h3>
+                    <h3><i class="fab fa-github"></i> GitHub仓库信息</h3>
                     <p>输入您的GitHub仓库信息以加载文件列表</p>
                 </div>
                 
@@ -449,12 +449,12 @@
                 
                 <div class="form-group">
                     <label for="github-owner">仓库所有者</label>
-                    <input type="text" id="github-owner" placeholder="输入GitHub用户名或组织名">
+                    <input type="text" id="github-owner" placeholder="输入GitHub用户名或组织名" value="octocat">
                 </div>
                 
                 <div class="form-group">
                     <label for="github-repo">仓库名称</label>
-                    <input type="text" id="github-repo" placeholder="输入GitHub仓库名称">
+                    <input type="text" id="github-repo" placeholder="输入GitHub仓库名称" value="Spoon-Knife">
                 </div>
                 
                 <div class="form-group">
@@ -477,28 +477,6 @@
                     <div class="file-list" id="file-list">
                         <div class="empty-state">请先输入仓库信息并加载文件</div>
                     </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="download-password">下载密码</label>
-                    <div class="password-container">
-                        <input type="password" id="download-password" placeholder="输入文件下载密码">
-                        <span class="toggle-password" id="toggle-password">
-                            <i class="fas fa-eye"></i>
-                        </span>
-                    </div>
-                    <div class="error-message" id="password-error"></div>
-                </div>
-                
-                <button class="btn btn-success" id="download-btn">
-                    <i class="fas fa-download"></i> 下载选中文件
-                </button>
-                
-                <div class="progress-container" id="download-progress">
-                    <div class="progress-bar">
-                        <div class="progress" id="download-progress-bar"></div>
-                    </div>
-                    <div class="status" id="download-status">准备下载...</div>
                 </div>
                 
                 <div class="error-details" id="error-details">
@@ -533,7 +511,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>已保存的仓库配置</label>
+                    <label>已保存的仓库配置>
                     <div class="saved-repos" id="saved-repos">
                         <div class="empty-state">没有保存的仓库配置</div>
                     </div>
@@ -549,7 +527,7 @@
         
         <footer>
             <p>安全提示：所有操作均在您的浏览器中完成，不会上传到任何服务器</p>
-            <p>© 2025 GitHub加密文件下载系统 | 使用AES-256加密技术</p>
+            <p>© 2025 GitHub仓库文件浏览器 | 使用GitHub API v3</p>
         </footer>
     </div>
 
@@ -561,13 +539,6 @@
         const githubTokenInput = document.getElementById('github-token');
         const loadFilesBtn = document.getElementById('load-files-btn');
         const fileListElement = document.getElementById('file-list');
-        const downloadPasswordInput = document.getElementById('download-password');
-        const passwordError = document.getElementById('password-error');
-        const downloadBtn = document.getElementById('download-btn');
-        const downloadProgress = document.getElementById('download-progress');
-        const downloadProgressBar = document.getElementById('download-progress-bar');
-        const downloadStatus = document.getElementById('download-status');
-        const togglePassword = document.getElementById('toggle-password');
         const errorDetails = document.getElementById('error-details');
         const errorList = document.getElementById('error-list');
         const systemPasswordInput = document.getElementById('system-password');
@@ -583,8 +554,7 @@
         let selectedFile = null;
         let filesList = [];
         
-        // 预设密码（实际应用中应从安全来源获取）
-        const FILE_PASSWORD = "secure123";
+        // 预设密码
         const SYSTEM_PASSWORD = "admin123";
         
         // 标签切换功能
@@ -605,13 +575,6 @@
             });
         });
         
-        // 切换密码可见性
-        togglePassword.addEventListener('click', function() {
-            const type = downloadPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            downloadPasswordInput.setAttribute('type', type);
-            this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
-        });
-        
         // 加载文件列表
         loadFilesBtn.addEventListener('click', async function() {
             const owner = githubOwnerInput.value.trim();
@@ -620,7 +583,7 @@
             const token = githubTokenInput.value.trim();
             
             if (!owner || !repo) {
-                showError(passwordError, '请填写仓库所有者和仓库名称');
+                showApiStatus('error', '请填写仓库所有者和仓库名称');
                 return;
             }
             
@@ -644,88 +607,14 @@
                 // 重置按钮状态
                 loadFilesBtn.innerHTML = '<i class="fas fa-sync-alt"></i> 加载文件列表';
                 loadFilesBtn.disabled = false;
-                
-                // 清除错误信息
-                hideError(passwordError);
             } catch (error) {
                 console.error('加载文件列表失败:', error);
-                showError(passwordError, error.message || '加载文件列表失败');
                 showApiStatus('error', error.message || '加载文件列表失败');
                 showErrorDetails();
                 
                 // 重置按钮状态
                 loadFilesBtn.innerHTML = '<i class="fas fa-sync-alt"></i> 加载文件列表';
                 loadFilesBtn.disabled = false;
-            }
-        });
-        
-        // 下载文件
-        downloadBtn.addEventListener('click', async function() {
-            if (!selectedFile) {
-                showError(passwordError, '请先选择要下载的文件');
-                return;
-            }
-            
-            const password = downloadPasswordInput.value;
-            if (!password) {
-                showError(passwordError, '请输入下载密码');
-                return;
-            }
-            
-            if (password !== FILE_PASSWORD) {
-                showError(passwordError, '密码错误，请重新输入');
-                return;
-            }
-            
-            try {
-                // 清除错误信息
-                hideError(passwordError);
-                
-                // 显示进度条
-                downloadProgress.style.display = 'block';
-                downloadStatus.textContent = '正在下载文件...';
-                downloadProgressBar.style.width = '30%';
-                
-                // 获取文件内容
-                const fileContent = await getFileContent(
-                    githubOwnerInput.value.trim(),
-                    githubRepoInput.value.trim(),
-                    selectedFile.path
-                );
-                
-                downloadStatus.textContent = '正在准备下载...';
-                downloadProgressBar.style.width = '70%';
-                
-                // 创建Blob对象
-                const blob = new Blob([fileContent], { type: 'application/octet-stream' });
-                
-                // 创建下载链接
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = selectedFile.name;
-                document.body.appendChild(a);
-                a.click();
-                
-                // 清理
-                setTimeout(() => {
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                    
-                    downloadStatus.textContent = '文件下载成功！';
-                    downloadProgressBar.style.width = '100%';
-                    
-                    setTimeout(() => {
-                        downloadProgress.style.display = 'none';
-                        downloadProgressBar.style.width = '0%';
-                        downloadPasswordInput.value = '';
-                    }, 2000);
-                }, 100);
-            } catch (error) {
-                console.error('下载失败:', error);
-                downloadStatus.textContent = error.message || '文件下载失败！';
-                downloadProgressBar.style.backgroundColor = 'var(--danger-color)';
-                showError(passwordError, error.message);
             }
         });
         
@@ -785,9 +674,9 @@
             }
         });
         
-        // 获取仓库文件列表（修复版本）
+        // 修复后的API请求函数
         async function getRepoFiles(owner, repo, path = '', token = '') {
-            // 修正API URL格式（关键！）
+            // 关键修复：正确构造API URL
             const apiUrl = ` https://api.github.com/repos/$ {owner}/${repo}/contents/${encodeURIComponent(path)}`;
             
             // 添加认证头部（解决权限和速率限制问题）
@@ -809,7 +698,9 @@
                 if (!response.ok) {
                     let errorMsg = `请求失败 (HTTP ${response.status}): `;
                     switch(response.status) {
-                        case 401: errorMsg += "认证失败，请检查PAT权限"; break;
+                        case 401: 
+                            errorMsg += "认证失败，请检查PAT权限";
+                            break;
                         case 403: 
                             errorMsg += "API限制或无权访问";
                             // 检查速率限制头部
@@ -819,8 +710,17 @@
                                 errorMsg += `，请求次数已用尽，重置时间: ${resetTime.toLocaleTimeString()}`;
                             }
                             break;
-                        case 404: errorMsg += "仓库不存在或路径错误"; break;
-                        default: errorMsg += await response.text();
+                        case 404: 
+                            errorMsg += "仓库不存在或路径错误";
+                            // 添加详细诊断信息
+                            errorMsg += `。请检查: 
+                            - 仓库所有者: ${owner}
+                            - 仓库名称: ${repo}
+                            - 路径: ${path}
+                            - 是否私有仓库: ${token ? "是" : "否"}`;
+                            break;
+                        default: 
+                            errorMsg += await response.text();
                     }
                     throw new Error(errorMsg);
                 }
@@ -837,19 +737,9 @@
             }
         }
 
-        // 获取文件内容
-        async function getFileContent(owner, repo, path) {
-            const rawUrl = ` https://raw.githubusercontent.com/$ {owner}/${repo}/main/${encodeURIComponent(path)}`;
-            const response = await fetch(rawUrl);
-            if (!response.ok) {
-                throw new Error(`下载失败: ${response.status} ${response.statusText}`);
-            }
-            return await response.blob(); // 使用blob处理二进制文件
-        }
-
         // 渲染文件列表
         function renderFileList(files) {
-            if (files.length === 0) {
+            if (!files || files.length === 0) {
                 fileListElement.innerHTML = '<div class="empty-state">该仓库中没有文件</div>';
                 return;
             }
@@ -895,6 +785,97 @@
                     };
                 });
             });
+        }
+        
+        // 处理下载按钮点击
+        function handleDownloadClick(fileItem) {
+            document.querySelectorAll('.file-item').forEach(i => {
+                i.classList.remove('selected');
+            });
+            fileItem.classList.add('selected');
+            selectedFile = {
+                name: fileItem.querySelector('.file-name').textContent.trim(),
+                path: fileItem.dataset.path
+            };
+            
+            // 下载文件
+            downloadFile(selectedFile);
+        }
+        
+        // 下载文件
+        async function downloadFile(file) {
+            const owner = githubOwnerInput.value.trim();
+            const repo = githubRepoInput.value.trim();
+            
+            if (!owner || !repo) {
+                showApiStatus('error', '请先填写仓库所有者和仓库名称');
+                return;
+            }
+            
+            try {
+                // 关键修复：使用raw.githubusercontent.com直接下载文件
+                const rawUrl = ` https://raw.githubusercontent.com/$ {owner}/${repo}/main/${encodeURIComponent(file.path)}`;
+                
+                const response = await fetch(rawUrl);
+                if (!response.ok) {
+                    throw new Error(`下载失败: ${response.status} ${response.statusText}`);
+                }
+                
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = file.name;
+                document.body.appendChild(a);
+                a.click();
+                
+                // 清理
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    showApiStatus('success', `文件 "${file.name}" 下载成功！`);
+                }, 100);
+            } catch (error) {
+                console.error('下载失败:', error);
+                showApiStatus('error', error.message || '文件下载失败');
+            }
+        }
+        
+        // 获取文件扩展名
+        function getFileExtension(filename) {
+            return filename.split('.').pop().toLowerCase();
+        }
+        
+        // 获取文件图标
+        function getFileIcon(extension) {
+            const iconMap = {
+                'pdf': 'fa-file-pdf',
+                'doc': 'fa-file-word',
+                'docx': 'fa-file-word',
+                'xls': 'fa-file-excel',
+                'xlsx': 'fa-file-excel',
+                'ppt': 'fa-file-powerpoint',
+                'pptx': 'fa-file-powerpoint',
+                'txt': 'fa-file-alt',
+                'zip': 'fa-file-archive',
+                'rar': 'fa-file-archive',
+                'jpg': 'fa-file-image',
+                'jpeg': 'fa-file-image',
+                'png': 'fa-file-image',
+                'gif': 'fa-file-image',
+                'mp3': 'fa-file-audio',
+                'wav': 'fa-file-audio',
+                'mp4': 'fa-file-video',
+                'avi': 'fa-file-video',
+                'mov': 'fa-file-video',
+                'js': 'fa-file-code',
+                'html': 'fa-file-code',
+                'css': 'fa-file-code',
+                'json': 'fa-file-code'
+            };
+            
+            return iconMap[extension] || 'fa-file';
         }
         
         // 渲染保存的仓库配置
@@ -943,6 +924,8 @@
                     tabContentElements.forEach(t => t.classList.remove('active'));
                     document.querySelector('.tab[data-tab="download"]').classList.add('active');
                     document.getElementById('download-tab').classList.add('active');
+                    
+                    showApiStatus('info', `已加载仓库配置: ${repo.owner}/${repo.repo}`);
                 });
             });
             
@@ -958,57 +941,6 @@
                     }
                 });
             });
-        }
-        
-        // 处理下载按钮点击
-        function handleDownloadClick(fileItem) {
-            document.querySelectorAll('.file-item').forEach(i => {
-                i.classList.remove('selected');
-            });
-            fileItem.classList.add('selected');
-            selectedFile = {
-                name: fileItem.querySelector('.file-name').textContent.trim(),
-                path: fileItem.dataset.path
-            };
-            
-            // 触发密码输入
-            downloadPasswordInput.focus();
-        }
-        
-        // 获取文件扩展名
-        function getFileExtension(filename) {
-            return filename.split('.').pop().toLowerCase();
-        }
-        
-        // 获取文件图标
-        function getFileIcon(extension) {
-            const iconMap = {
-                'pdf': 'fa-file-pdf',
-                'doc': 'fa-file-word',
-                'docx': 'fa-file-word',
-                'xls': 'fa-file-excel',
-                'xlsx': 'fa-file-excel',
-                'ppt': 'fa-file-powerpoint',
-                'pptx': 'fa-file-powerpoint',
-                'txt': 'fa-file-alt',
-                'zip': 'fa-file-archive',
-                'rar': 'fa-file-archive',
-                'jpg': 'fa-file-image',
-                'jpeg': 'fa-file-image',
-                'png': 'fa-file-image',
-                'gif': 'fa-file-image',
-                'mp3': 'fa-file-audio',
-                'wav': 'fa-file-audio',
-                'mp4': 'fa-file-video',
-                'avi': 'fa-file-video',
-                'mov': 'fa-file-video',
-                'js': 'fa-file-code',
-                'html': 'fa-file-code',
-                'css': 'fa-file-code',
-                'json': 'fa-file-code'
-            };
-            
-            return iconMap[extension] || 'fa-file';
         }
         
         // 显示错误详情
@@ -1060,6 +992,9 @@
                 githubRepoInput.value = lastRepo.repo || '';
                 githubPathInput.value = lastRepo.path || '';
             }
+            
+            // 默认隐藏错误详情
+            hideErrorDetails();
         }
         
         // 页面加载完成后初始化
