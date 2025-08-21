@@ -127,6 +127,14 @@
             background: #c0392b;
         }
         
+        .btn-warning {
+            background: var(--warning-color);
+        }
+        
+        .btn-warning:hover {
+            background: #e67e22;
+        }
+        
         .file-list {
             margin-top: 20px;
             border: 1px solid var(--border-color);
@@ -268,6 +276,78 @@
             color: #777;
         }
         
+        .error-details {
+            background-color: #fff8f8;
+            border-left: 4px solid var(--danger-color);
+            padding: 15px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .error-details h3 {
+            color: var(--danger-color);
+            margin-bottom: 10px;
+        }
+        
+        .error-details ul {
+            padding-left: 20px;
+        }
+        
+        .error-details li {
+            margin-bottom: 8px;
+        }
+        
+        .saved-repos {
+            margin-top: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .repo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .repo-item:last-child {
+            border-bottom: none;
+        }
+        
+        .repo-info {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .repo-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .action-btn-small {
+            padding: 4px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            border: none;
+            color: white;
+        }
+        
+        .load-btn {
+            background: var(--primary-color);
+        }
+        
+        .remove-btn {
+            background: var(--danger-color);
+        }
+        
         @media (max-width: 600px) {
             .container {
                 border-radius: 0;
@@ -296,6 +376,35 @@
             margin-right: 8px;
             color: var(--primary-color);
         }
+        
+        .tabs {
+            display: flex;
+            background: var(--light-color);
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .tab.active {
+            background: white;
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -305,64 +414,110 @@
             <p class="description">安全访问、密码验证的文件下载系统</p>
         </header>
         
+        <div class="tabs">
+            <div class="tab active" data-tab="download">下载文件</div>
+            <div class="tab" data-tab="settings">设置</div>
+        </div>
+        
         <div class="content">
-            <div class="github-info">
-                <h3><i class="fab fa-github"></i> GitHub配置信息</h3>
-                <p>输入您的GitHub仓库信息以加载文件列表</p>
-            </div>
-            
-            <div class="form-group">
-                <label for="github-owner">仓库所有者</label>
-                <input type="text" id="github-owner" placeholder="输入GitHub用户名或组织名">
-            </div>
-            
-            <div class="form-group">
-                <label for="github-repo">仓库名称</label>
-                <input type="text" id="github-repo" placeholder="输入GitHub仓库名称">
-            </div>
-            
-            <div class="form-group">
-                <label for="github-path">仓库路径 (可选)</label>
-                <input type="text" id="github-path" placeholder="输入仓库内的路径，如: docs/files">
-            </div>
-            
-            <button class="btn" id="load-files-btn">
-                <i class="fas fa-sync-alt"></i> 加载文件列表
-            </button>
-            
-            <div class="form-group">
-                <label>仓库文件列表</label>
-                <div class="file-list" id="file-list">
-                    <div class="empty-state">请先输入仓库信息并加载文件</div>
+            <div class="tab-content active" id="download-tab">
+                <div class="github-info">
+                    <h3><i class="fab fa-github"></i> GitHub配置信息</h3>
+                    <p>输入您的GitHub仓库信息以加载文件列表</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="github-owner">仓库所有者</label>
+                    <input type="text" id="github-owner" placeholder="输入GitHub用户名或组织名">
+                </div>
+                
+                <div class="form-group">
+                    <label for="github-repo">仓库名称</label>
+                    <input type="text" id="github-repo" placeholder="输入GitHub仓库名称">
+                </div>
+                
+                <div class="form-group">
+                    <label for="github-path">仓库路径 (可选)</label>
+                    <input type="text" id="github-path" placeholder="输入仓库内的路径，如: docs/files">
+                </div>
+                
+                <button class="btn" id="load-files-btn">
+                    <i class="fas fa-sync-alt"></i> 加载文件列表
+                </button>
+                
+                <div class="form-group">
+                    <label>仓库文件列表</label>
+                    <div class="file-list" id="file-list">
+                        <div class="empty-state">请先输入仓库信息并加载文件</div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="download-password">下载密码</label>
+                    <div class="password-container">
+                        <input type="password" id="download-password" placeholder="输入文件下载密码">
+                        <span class="toggle-password" id="toggle-password">
+                            <i class="fas fa-eye"></i>
+                        </span>
+                    </div>
+                    <div class="error-message" id="password-error"></div>
+                </div>
+                
+                <button class="btn btn-success" id="download-btn">
+                    <i class="fas fa-download"></i> 下载选中文件
+                </button>
+                
+                <div class="progress-container" id="download-progress">
+                    <div class="progress-bar">
+                        <div class="progress" id="download-progress-bar"></div>
+                    </div>
+                    <div class="status" id="download-status">准备下载...</div>
+                </div>
+                
+                <div class="error-details" id="error-details">
+                    <h3><i class="fas fa-exclamation-triangle"></i> 无法加载文件列表的原因</h3>
+                    <ul id="error-list">
+                        <!-- 错误详情将在这里动态生成 -->
+                    </ul>
                 </div>
             </div>
             
-            <div class="form-group">
-                <label for="download-password">下载密码</label>
-                <div class="password-container">
-                    <input type="password" id="download-password" placeholder="输入文件下载密码">
-                    <span class="toggle-password" id="toggle-password">
-                        <i class="fas fa-eye"></i>
-                    </span>
+            <div class="tab-content" id="settings-tab">
+                <div class="github-info">
+                    <h3><i class="fas fa-cog"></i> 系统设置</h3>
+                    <p>管理保存的仓库配置和系统选项</p>
                 </div>
-                <div class="error-message" id="password-error"></div>
-            </div>
-            
-            <button class="btn btn-success" id="download-btn">
-                <i class="fas fa-download"></i> 下载选中文件
-            </button>
-            
-            <div class="progress-container" id="download-progress">
-                <div class="progress-bar">
-                    <div class="progress" id="download-progress-bar"></div>
+                
+                <div class="form-group">
+                    <label for="system-password">系统密码</label>
+                    <input type="password" id="system-password" placeholder="输入系统管理密码">
+                    <div class="error-message" id="system-password-error"></div>
                 </div>
-                <div class="status" id="download-status">准备下载...</div>
+                
+                <div class="form-group">
+                    <button class="btn" id="save-config-btn">
+                        <i class="fas fa-save"></i> 保存当前配置
+                    </button>
+                </div>
+                
+                <div class="form-group">
+                    <label>已保存的仓库配置</label>
+                    <div class="saved-repos" id="saved-repos">
+                        <div class="empty-state">没有保存的仓库配置</div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <button class="btn btn-danger" id="clear-config-btn">
+                        <i class="fas fa-trash-alt"></i> 清除所有配置
+                    </button>
+                </div>
             </div>
         </div>
         
         <footer>
             <p>安全提示：所有操作均在您的浏览器中完成，不会上传到任何服务器</p>
-            <p>© 2025 GitHub加密文件下载系统</p>
+            <p>© 2025 GitHub加密文件下载系统 | 使用AES-256加密技术</p>
         </footer>
     </div>
 
@@ -380,6 +535,15 @@
         const downloadProgressBar = document.getElementById('download-progress-bar');
         const downloadStatus = document.getElementById('download-status');
         const togglePassword = document.getElementById('toggle-password');
+        const errorDetails = document.getElementById('error-details');
+        const errorList = document.getElementById('error-list');
+        const systemPasswordInput = document.getElementById('system-password');
+        const systemPasswordError = document.getElementById('system-password-error');
+        const saveConfigBtn = document.getElementById('save-config-btn');
+        const savedReposElement = document.getElementById('saved-repos');
+        const clearConfigBtn = document.getElementById('clear-config-btn');
+        const tabElements = document.querySelectorAll('.tab');
+        const tabContentElements = document.querySelectorAll('.tab-content');
         
         // 存储当前选中的文件和文件列表
         let selectedFile = null;
@@ -387,6 +551,25 @@
         
         // 预设密码（实际应用中应从安全来源获取）
         const FILE_PASSWORD = "secure123";
+        const SYSTEM_PASSWORD = "admin123";
+        
+        // 标签切换功能
+        tabElements.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // 移除所有活动标签
+                tabElements.forEach(t => t.classList.remove('active'));
+                tabContentElements.forEach(t => t.classList.remove('active'));
+                
+                // 添加当前活动标签
+                tab.classList.add('active');
+                document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+                
+                // 切换到设置标签页时加载保存的仓库
+                if (tab.dataset.tab === 'settings') {
+                    renderSavedRepos();
+                }
+            });
+        });
         
         // 切换密码可见性
         togglePassword.addEventListener('click', function() {
@@ -411,6 +594,9 @@
                 loadFilesBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 加载中...';
                 loadFilesBtn.disabled = true;
                 
+                // 隐藏之前的错误详情
+                hideErrorDetails();
+                
                 // 获取仓库文件列表
                 filesList = await getRepoFiles(owner, repo, path);
                 
@@ -426,6 +612,7 @@
             } catch (error) {
                 console.error('加载文件列表失败:', error);
                 showError(passwordError, error.message || '加载文件列表失败');
+                showErrorDetails(error);
                 
                 // 重置按钮状态
                 loadFilesBtn.innerHTML = '<i class="fas fa-sync-alt"></i> 加载文件列表';
@@ -503,6 +690,62 @@
             }
         });
         
+        // 保存当前配置
+        saveConfigBtn.addEventListener('click', function() {
+            const systemPassword = systemPasswordInput.value;
+            if (systemPassword !== SYSTEM_PASSWORD) {
+                showError(systemPasswordError, '系统密码错误');
+                return;
+            }
+            
+            const owner = githubOwnerInput.value.trim();
+            const repo = githubRepoInput.value.trim();
+            const path = githubPathInput.value.trim();
+            
+            if (!owner || !repo) {
+                showError(systemPasswordError, '请填写仓库所有者和仓库名称');
+                return;
+            }
+            
+            // 保存配置到localStorage
+            const repoConfig = {
+                owner,
+                repo,
+                path,
+                timestamp: new Date().toISOString()
+            };
+            
+            let savedRepos = JSON.parse(localStorage.getItem('savedRepos')) || [];
+            savedRepos.push(repoConfig);
+            localStorage.setItem('savedRepos', JSON.stringify(savedRepos));
+            
+            // 更新UI
+            renderSavedRepos();
+            
+            // 清除密码和错误
+            systemPasswordInput.value = '';
+            hideError(systemPasswordError);
+            
+            alert('配置保存成功！');
+        });
+        
+        // 清除所有配置
+        clearConfigBtn.addEventListener('click', function() {
+            const systemPassword = systemPasswordInput.value;
+            if (systemPassword !== SYSTEM_PASSWORD) {
+                showError(systemPasswordError, '系统密码错误');
+                return;
+            }
+            
+            if (confirm('确定要清除所有保存的仓库配置吗？此操作不可撤销！')) {
+                localStorage.removeItem('savedRepos');
+                renderSavedRepos();
+                systemPasswordInput.value = '';
+                hideError(systemPasswordError);
+                alert('所有配置已清除！');
+            }
+        });
+        
         // 获取仓库文件列表
         async function getRepoFiles(owner, repo, path = '') {
             const apiUrl = ` https://api.github.com/repos/$ {owner}/${repo}/contents/${path}`;
@@ -510,10 +753,30 @@
             const response = await fetch(apiUrl);
             
             if (!response.ok) {
-                throw new Error('无法获取仓库文件列表');
+                // 根据状态码提供更具体的错误信息
+                let errorMessage = '无法获取仓库文件列表';
+                
+                switch (response.status) {
+                    case 404:
+                        errorMessage = '仓库不存在或路径错误';
+                        break;
+                    case 403:
+                        errorMessage = 'API请求次数超限，请稍后再试';
+                        break;
+                    case 401:
+                        errorMessage = '未授权访问，请检查仓库是否为公开';
+                        break;
+                }
+                
+                throw new Error(`${errorMessage} (HTTP ${response.status})`);
             }
             
             const data = await response.json();
+            
+            // 检查返回的是否是文件列表
+            if (!Array.isArray(data)) {
+                throw new Error('返回的数据格式不正确，可能是单个文件而非目录');
+            }
             
             // 过滤出文件类型（排除文件夹）
             return data.filter(item => item.type === 'file');
@@ -582,6 +845,69 @@
             });
         }
         
+        // 渲染保存的仓库配置
+        function renderSavedRepos() {
+            const savedRepos = JSON.parse(localStorage.getItem('savedRepos')) || [];
+            
+            if (savedRepos.length === 0) {
+                savedReposElement.innerHTML = '<div class="empty-state">没有保存的仓库配置</div>';
+                return;
+            }
+            
+            let reposHTML = '';
+            savedRepos.forEach((repo, index) => {
+                const repoName = `${repo.owner}/${repo.repo}`;
+                const pathInfo = repo.path ? `路径: ${repo.path}` : '根目录';
+                const date = new Date(repo.timestamp).toLocaleString();
+                
+                reposHTML += `
+                    <div class="repo-item">
+                        <div class="repo-info">
+                            <strong>${repoName}</strong>
+                            <div>${pathInfo} | ${date}</div>
+                        </div>
+                        <div class="repo-actions">
+                            <button class="action-btn-small load-btn" data-index="${index}">加载</button>
+                            <button class="action-btn-small remove-btn" data-index="${index}">删除</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            savedReposElement.innerHTML = reposHTML;
+            
+            // 添加事件监听器
+            document.querySelectorAll('.load-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.dataset.index);
+                    const repo = savedRepos[index];
+                    
+                    githubOwnerInput.value = repo.owner;
+                    githubRepoInput.value = repo.repo;
+                    githubPathInput.value = repo.path || '';
+                    
+                    // 切换到下载标签页
+                    tabElements.forEach(t => t.classList.remove('active'));
+                    tabContentElements.forEach(t => t.classList.remove('active'));
+                    document.querySelector('.tab[data-tab="download"]').classList.add('active');
+                    document.getElementById('download-tab').classList.add('active');
+                });
+            });
+            
+            document.querySelectorAll('.remove-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.dataset.index);
+                    const repo = savedRepos[index];
+                    
+                    if (confirm(`确定要删除 ${repo.owner}/${repo.repo} 的配置吗？`)) {
+                        savedRepos.splice(index, 1);
+                        localStorage.setItem('savedRepos', JSON.stringify(savedRepos));
+                        renderSavedRepos();
+                    }
+                });
+            });
+        }
+        
         // 处理下载按钮点击
         function handleDownloadClick(fileItem) {
             document.querySelectorAll('.file-item').forEach(i => {
@@ -633,6 +959,32 @@
             return iconMap[extension] || 'fa-file';
         }
         
+        // 显示错误详情
+        function showErrorDetails(error) {
+            errorDetails.style.display = 'block';
+            errorList.innerHTML = '';
+            
+            const errors = [
+                '仓库不存在或路径错误',
+                '仓库设置为私有（GitHub Pages仅支持公开仓库）',
+                'API请求次数超限（每小时60次）',
+                '仓库名称或所有者拼写错误',
+                '路径包含特殊字符或空格',
+                'GitHub服务暂时不可用'
+            ];
+            
+            errors.forEach(errorText => {
+                const li = document.createElement('li');
+                li.textContent = errorText;
+                errorList.appendChild(li);
+            });
+        }
+        
+        // 隐藏错误详情
+        function hideErrorDetails() {
+            errorDetails.style.display = 'none';
+        }
+        
         // 显示错误信息
         function showError(element, message) {
             if (element) {
@@ -650,6 +1002,20 @@
                 element.style.display = 'none';
             }
         }
+        
+        // 初始化页面
+        function initPage() {
+            // 尝试加载上次使用的仓库配置
+            const lastRepo = JSON.parse(localStorage.getItem('lastRepo'));
+            if (lastRepo) {
+                githubOwnerInput.value = lastRepo.owner || '';
+                githubRepoInput.value = lastRepo.repo || '';
+                githubPathInput.value = lastRepo.path || '';
+            }
+        }
+        
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', initPage);
     </script>
 </body>
 </html>
